@@ -67,7 +67,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<ClaimResponse>)
     });
   } catch (error) {
     console.error('Claim API failed', error);
-    const message = error instanceof Error ? error.message : 'Failed to claim deal';
+    const message =
+      typeof error === 'object' && error !== null && 'message' in error
+        ? String((error as any).message)
+        : typeof error === 'string'
+          ? error
+          : 'Failed to claim deal';
     return res.status(500).json({ success: false, message });
   }
 };

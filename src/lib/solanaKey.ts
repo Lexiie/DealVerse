@@ -29,6 +29,7 @@ const decodeBase58 = (value: string): Uint8Array => {
 
 export const parseSecretKey = (raw: string): Uint8Array => {
   const trimmed = raw.trim();
+  const compact = trimmed.replace(/\s+/g, '');
 
   try {
     const asArray = JSON.parse(trimmed);
@@ -36,22 +37,26 @@ export const parseSecretKey = (raw: string): Uint8Array => {
       return Uint8Array.from(asArray);
     }
   } catch (error) {
-    // fall through to base58
+    // fall through to other encodings
   }
 
-  const base64Like = /^[A-Za-z0-9+/=]+$/.test(trimmed) && trimmed.length % 4 === 0;
+  const base64Like = /^[A-Za-z0-9+/=_-]+$/.test(compact);
   if (base64Like) {
     try {
-      const decodedBase64 = Uint8Array.from(Buffer.from(trimmed, 'base64'));
+      let normalized = compact.replace(/-/g, '+').replace(/_/g, '/');
+      while (normalized.length % 4 !== 0) {
+        normalized += '=';
+      }
+      const decodedBase64 = Uint8Array.from(Buffer.from(normalized, 'base64'));
       if (decodedBase64.length > 0) {
         return decodedBase64;
       }
     } catch (error) {
-      // ignore and try base58
+      // ignore and try base58 fallback
     }
   }
 
-  const decoded = decodeBase58(trimmed);
+  const decoded = decodeBase58(compact);
   if (!decoded.length) {
     throw new Error('Unable to decode secret key');
   }
