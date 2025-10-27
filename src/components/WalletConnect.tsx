@@ -14,9 +14,9 @@ export const WalletConnect = () => {
 
   return (
     <WalletMultiButton
-      className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
+      className="inline-flex h-10 max-w-[200px] items-center justify-center gap-2 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
     >
-      <span className="truncate">{label}</span>
+      <span className="truncate text-center">{label}</span>
     </WalletMultiButton>
   );
 };

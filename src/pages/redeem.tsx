@@ -37,19 +37,20 @@ const RedeemPage = () => {
         setLastStatus('success');
         toast.success('Coupon redeemed!');
         setStepStates(['done', 'done', 'done', 'done']);
+        setIsSheetOpen(true);
       } else {
         setLastStatus('error');
         toast.error(response.error ?? 'Unable to redeem coupon');
         setStepStates(['done', 'error', 'pending', 'pending']);
+        setIsSheetOpen(false);
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unable to redeem coupon';
       setLastStatus('error');
       toast.error(message);
       setStepStates(['done', 'error', 'pending', 'pending']);
+      setIsSheetOpen(false);
     }
-
-    setIsSheetOpen(true);
   };
 
   useEffect(() => {
@@ -65,7 +66,7 @@ const RedeemPage = () => {
       <Head>
         <title>Redeem NFT Coupon</title>
       </Head>
-      <div className="grid gap-8 lg:grid-cols-[2fr,1fr]">
+      <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
         <Card className="bg-slate-900/75">
           <CardHeader title="Scan Coupon" subtitle="Verify coupon ownership in real time" />
           <CardContent className="space-y-6">
@@ -81,7 +82,7 @@ const RedeemPage = () => {
               <div className="flex flex-col gap-3 sm:flex-row">
                 <Input
                   value={encodedPayload}
-                  placeholder="Coupon code"
+                  placeholder="Paste coupon code"
                   onChange={(event) => setEncodedPayload(event.target.value)}
                 />
                 <Button

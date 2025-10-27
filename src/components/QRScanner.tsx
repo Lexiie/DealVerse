@@ -45,8 +45,8 @@ export const QRScanner = ({ onResult, onError }: QRScannerProps) => {
   );
 
   return (
-    <div className="relative mx-auto w-full max-w-xl">
-      <div className="relative aspect-square overflow-hidden rounded-[32px] border-2 border-primary/70 bg-slate-900/80 shadow-2xl">
+    <div className="relative mx-auto w-[90%] max-w-xl">
+      <div className="relative aspect-square overflow-hidden rounded-[32px] border-2 border-primary/70 bg-slate-900/85 shadow-2xl">
         <DynamicQrScanner
           onScan={(results: ScannerResult) => {
             const value = results[0]?.rawValue ?? null;
@@ -65,8 +65,22 @@ export const QRScanner = ({ onResult, onError }: QRScannerProps) => {
           style={{ WebkitMaskImage: 'radial-gradient(circle at center, transparent 55%, black 78%)', maskImage: 'radial-gradient(circle at center, transparent 55%, black 78%)' }}
         />
         <div className="pointer-events-none absolute inset-4 rounded-3xl border-2 border-primary/50" />
-        <div className="pointer-events-none absolute bottom-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-primary/90 text-lg shadow-lg">
+        <button
+          type="button"
+          className="absolute left-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-slate-900/80 text-lg text-slate-200 shadow"
+          aria-label="Toggle flash"
+        >
           ⚡
+        </button>
+        <button
+          type="button"
+          className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-slate-900/80 text-lg text-slate-200 shadow"
+          aria-label="Switch camera"
+        >
+          🔄
+        </button>
+        <div className="pointer-events-none absolute bottom-4 right-4 flex h-9 w-9 items-center justify-center rounded-full bg-primary/90 text-base text-slate-950 shadow-lg">
+          ▢
         </div>
       </div>
     </div>
