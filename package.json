@@ -10,7 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@metaplex-foundation/js": "^1.4.15",
+    "@metaplex-foundation/js": "^0.20.1",
     "@solana/wallet-adapter-base": "^0.9.26",
     "@solana/wallet-adapter-react": "^0.16.31",
     "@solana/wallet-adapter-ui": "^0.9.33",
