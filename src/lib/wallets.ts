@@ -1,4 +1,7 @@
-import { BackpackWalletAdapter, PhantomWalletAdapter, SolflareWalletAdapter, SolletExtensionWalletAdapter } from '@solana/wallet-adapter-wallets';
+import { BackpackWalletAdapter } from '@solana/wallet-adapter-backpack';
+import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
+import { SolflareWalletAdapter } from '@solana/wallet-adapter-solflare';
+import { SolletExtensionWalletAdapter } from '@solana/wallet-adapter-sollet';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { SOLANA_CLUSTER } from '@/utils/constants';
 

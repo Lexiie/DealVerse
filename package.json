@@ -24,7 +24,11 @@
     "react-hook-form": "*",
     "sonner": "*",
     "@yudiel/react-qr-scanner": "*",
-    "@solana/wallet-adapter-react-ui": "*"
+    "@solana/wallet-adapter-react-ui": "*",
+    "@solana/wallet-adapter-backpack": "*",
+    "@solana/wallet-adapter-phantom": "*",
+    "@solana/wallet-adapter-solflare": "*",
+    "@solana/wallet-adapter-sollet": "*"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "*",
