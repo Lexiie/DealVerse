@@ -9,9 +9,9 @@ export type QRScannerProps = {
   onError?: (message: string) => void;
 };
 
-const QrReader = dynamic(async () => {
-  const mod = await import('react-qr-reader');
-  return mod.QrReader ?? mod.default;
+const DynamicQrScanner = dynamic(async () => {
+  const mod = await import('@yudiel/react-qr-scanner');
+  return mod.QrScanner ?? mod.default;
 }, {
   ssr: false
 });
@@ -44,11 +44,12 @@ export const QRScanner = ({ onResult, onError }: QRScannerProps) => {
 
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/60 p-4 shadow-lg">
-      <QrReader
-        delay={300}
+      <DynamicQrScanner
+        onDecode={(result) => handleScan(result ?? null)}
         onError={handleError}
-        onScan={handleScan}
-        style={{ width: '100%' }}
+        constraints={{ facingMode: 'environment' }}
+        containerStyle={{ width: '100%' }}
+        videoStyle={{ width: '100%' }}
       />
     </div>
   );
