@@ -1,6 +1,6 @@
-import { Metaplex, arweaveStorage, keypairIdentity } from '@metaplex-foundation/js';
-import { Keypair } from '@solana/web3.js';
+import { Metaplex, irysStorage, keypairIdentity } from '@metaplex-foundation/js';
 import { connection } from './solana';
+import { keypairFromSecret } from './solanaKey';
 
 type UploadParams = {
   metadata: Record<string, any>;
@@ -38,23 +38,21 @@ const uploadToPinata = async (metadata: Record<string, any>) => {
   return `https://gateway.pinata.cloud/ipfs/${json.IpfsHash}`;
 };
 
-const uploadToArweave = async (metadata: Record<string, any>) => {
-  const keyJson = process.env.ARWEAVE_KEY_JSON!;
-  let key: unknown;
-
-  try {
-    key = JSON.parse(keyJson);
-  } catch (error) {
-    throw new Error('Invalid ARWEAVE_KEY_JSON: must be a valid JSON string');
+const uploadToIrys = async (metadata: Record<string, any>) => {
+  const secret = process.env.IRYS_SECRET_KEY ?? process.env.SOLANA_SIGNER_SECRET_KEY;
+  if (!secret) {
+    throw new Error('Missing IRYS_SECRET_KEY or SOLANA_SIGNER_SECRET_KEY for metadata uploads');
   }
 
-  const wallet = Keypair.generate();
+  const identity = keypairFromSecret(secret);
   const metaplex = Metaplex.make(connection)
-    .use(keypairIdentity(wallet))
+    .use(keypairIdentity(identity))
     .use(
-      arweaveStorage({
-        key,
-        host: 'https://arweave.net'
+      irysStorage({
+        address: process.env.IRYS_NODE_ADDRESS ?? 'https://node1.irys.xyz',
+        providerUrl: connection.rpcEndpoint,
+        timeout: 60000,
+        identity
       })
     );
 
@@ -64,14 +62,14 @@ const uploadToArweave = async (metadata: Record<string, any>) => {
 
 export const uploadMetadataAuto = async ({ metadata, preprovidedUri }: UploadParams): Promise<string> => {
   const hasPinata = isSet(process.env.PINATA_JWT);
-  const hasArweave = isSet(process.env.ARWEAVE_KEY_JSON);
+  const hasIrys = isSet(process.env.IRYS_SECRET_KEY ?? process.env.SOLANA_SIGNER_SECRET_KEY);
 
   if (hasPinata) {
     return uploadToPinata(metadata);
   }
 
-  if (hasArweave) {
-    return uploadToArweave(metadata);
+  if (hasIrys) {
+    return uploadToIrys(metadata);
   }
 
   if (isSet(preprovidedUri)) {
