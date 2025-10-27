@@ -11,7 +11,7 @@ export type QRScannerProps = {
 
 const DynamicQrScanner = dynamic(async () => {
   const mod = await import('@yudiel/react-qr-scanner');
-  return mod.QrScanner ?? mod.default;
+  return mod.Scanner ?? mod.default;
 }, {
   ssr: false
 });
