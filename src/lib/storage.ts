@@ -56,7 +56,7 @@ const uploadToIrys = async (metadata: Record<string, any>) => {
       })
     );
 
-  const { uri } = await metaplex.storage().uploadJson(metadata);
+  const uri = await metaplex.storage().uploadJson(metadata);
   return uri;
 };
 
