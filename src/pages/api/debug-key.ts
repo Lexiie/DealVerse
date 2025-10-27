@@ -16,7 +16,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<Respon
       return res.status(400).json({ ok: false, message: 'SOLANA_SIGNER_SECRET_KEY is missing' });
     }
     const decoded = parseSecretKey(secret);
-    return res.status(200).json({ ok: true, length: decoded.length });
+    const length = decoded.length;
+    return res.status(200).json({ ok: true, length });
   } catch (error) {
     console.error('parseSecretKey failed', error);
     const message = error instanceof Error ? error.message : typeof error === 'string' ? error : 'Unknown error';

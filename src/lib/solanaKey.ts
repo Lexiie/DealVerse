@@ -32,9 +32,12 @@ export const parseSecretKey = (raw: string): Uint8Array => {
   const compact = trimmed.replace(/\s+/g, '');
 
   try {
-    const asArray = JSON.parse(trimmed);
-    if (Array.isArray(asArray)) {
-      return Uint8Array.from(asArray);
+    const parsed = JSON.parse(trimmed);
+    if (Array.isArray(parsed)) {
+      return Uint8Array.from(parsed);
+    }
+    if (typeof parsed === 'string') {
+      return parseSecretKey(parsed);
     }
   } catch (error) {
     // fall through to other encodings
@@ -48,7 +51,10 @@ export const parseSecretKey = (raw: string): Uint8Array => {
         normalized += '=';
       }
       const decodedBase64 = Uint8Array.from(Buffer.from(normalized, 'base64'));
-      if (decodedBase64.length > 0) {
+      if (decodedBase64.length >= 64) {
+        return decodedBase64.length > 64 ? decodedBase64.slice(0, 64) : decodedBase64;
+      }
+      if (decodedBase64.length === 32) {
         return decodedBase64;
       }
     } catch (error) {
@@ -64,7 +70,10 @@ export const parseSecretKey = (raw: string): Uint8Array => {
         normalized = `0${normalized}`;
       }
       const decodedHex = Uint8Array.from(Buffer.from(normalized, 'hex'));
-      if (decodedHex.length > 0) {
+      if (decodedHex.length >= 64) {
+        return decodedHex.length > 64 ? decodedHex.slice(0, 64) : decodedHex;
+      }
+      if (decodedHex.length === 32) {
         return decodedHex;
       }
     } catch (error) {
@@ -73,14 +82,27 @@ export const parseSecretKey = (raw: string): Uint8Array => {
   }
 
   const decoded = decodeBase58(compact);
+  if (decoded.length >= 64) {
+    return decoded.length > 64 ? decoded.slice(0, 64) : decoded;
+  }
+  if (decoded.length === 32) {
+    return decoded;
+  }
   if (!decoded.length) {
     throw new Error('Unable to decode secret key');
   }
-  return decoded;
+  throw new Error(`Unexpected secret key length: ${decoded.length}`);
 };
 
 export const keypairFromSecret = (raw: string): Keypair => {
-  return Keypair.fromSecretKey(parseSecretKey(raw));
+  const secret = parseSecretKey(raw);
+  if (secret.length === 32) {
+    return Keypair.fromSeed(secret);
+  }
+  if (secret.length === 64) {
+    return Keypair.fromSecretKey(secret);
+  }
+  throw new Error(`Invalid secret key length: ${secret.length}`);
 };
 
 export const loadKeypairFromEnv = (envVar: string): Keypair => {
