@@ -70,7 +70,7 @@ const loadClaimCounts = async (dealIds: string[]) => {
 
   const supabase = getServiceSupabase();
   const { data, error } = await supabase
-    .from<Pick<MintRow, 'deal_id'>>(MINTS_TABLE)
+    .from(MINTS_TABLE)
     .select('deal_id')
     .in('deal_id', dealIds);
 
@@ -78,8 +78,9 @@ const loadClaimCounts = async (dealIds: string[]) => {
     throw error;
   }
 
+  const rows = (data ?? []) as Pick<MintRow, 'deal_id'>[];
   const counts = new Map<string, number>();
-  (data ?? []).forEach(({ deal_id }) => {
+  rows.forEach(({ deal_id }) => {
     counts.set(deal_id, (counts.get(deal_id) ?? 0) + 1);
   });
 
@@ -89,7 +90,7 @@ const loadClaimCounts = async (dealIds: string[]) => {
 export const listDeals = async (): Promise<Deal[]> => {
   const supabase = getServiceSupabase();
   const { data, error } = await supabase
-    .from<DealRow>(DEALS_TABLE)
+    .from(DEALS_TABLE)
     .select('*')
     .order('created_at', { ascending: false });
 
@@ -97,7 +98,7 @@ export const listDeals = async (): Promise<Deal[]> => {
     throw error;
   }
 
-  const rows = data ?? [];
+  const rows = (data ?? []) as DealRow[];
   const counts = await loadClaimCounts(rows.map((row) => row.id));
 
   return rows.map((row) => mapDealRow(row, counts.get(row.id) ?? 0));
@@ -106,7 +107,7 @@ export const listDeals = async (): Promise<Deal[]> => {
 export const getDealById = async (dealId: string): Promise<Deal | null> => {
   const supabase = getServiceSupabase();
   const { data, error } = await supabase
-    .from<DealRow>(DEALS_TABLE)
+    .from(DEALS_TABLE)
     .select('*')
     .eq('id', dealId)
     .maybeSingle();
@@ -115,12 +116,13 @@ export const getDealById = async (dealId: string): Promise<Deal | null> => {
     throw error;
   }
 
-  if (!data) {
+  const row = (data ?? null) as DealRow | null;
+  if (!row) {
     return null;
   }
 
-  const counts = await loadClaimCounts([data.id]);
-  return mapDealRow(data, counts.get(data.id) ?? 0);
+  const counts = await loadClaimCounts([row.id]);
+  return mapDealRow(row, counts.get(row.id) ?? 0);
 };
 
 export const recordDeal = async ({
@@ -159,7 +161,7 @@ export const recordDeal = async ({
   };
 
   const { data, error } = await supabase
-    .from<DealRow>(DEALS_TABLE)
+    .from(DEALS_TABLE)
     .insert(payload)
     .select('*')
     .single();
@@ -168,13 +170,14 @@ export const recordDeal = async ({
     throw error;
   }
 
-  return mapDealRow(data, 0);
+  const row = data as DealRow;
+  return mapDealRow(row, 0);
 };
 
 export const findClaimByWallet = async (dealId: string, walletAddress: string) => {
   const supabase = getServiceSupabase();
   const { data, error } = await supabase
-    .from<Pick<MintRow, 'mint' | 'deal_id' | 'owner'>>(MINTS_TABLE)
+    .from(MINTS_TABLE)
     .select('mint, deal_id, owner')
     .eq('deal_id', dealId)
     .eq('owner', walletAddress)
@@ -184,7 +187,7 @@ export const findClaimByWallet = async (dealId: string, walletAddress: string) =
     throw error;
   }
 
-  return data;
+  return (data ?? null) as Pick<MintRow, 'mint' | 'deal_id' | 'owner'> | null;
 };
 
 export const recordClaim = async ({
@@ -198,7 +201,7 @@ export const recordClaim = async ({
 }) => {
   const supabase = getServiceSupabase();
   const { data, error } = await supabase
-    .from<Pick<MintRow, 'deal_id' | 'mint' | 'owner'>>(MINTS_TABLE)
+    .from(MINTS_TABLE)
     .insert({
       deal_id: dealId,
       owner: walletAddress,
@@ -211,7 +214,7 @@ export const recordClaim = async ({
     throw error;
   }
 
-  return data;
+  return data as Pick<MintRow, 'deal_id' | 'mint' | 'owner'>;
 };
 
 export const registerRedeemNonce = async ({
@@ -225,7 +228,7 @@ export const registerRedeemNonce = async ({
 }) => {
   const supabase = getServiceSupabase();
   const { error } = await supabase
-    .from<RedeemNonceRow>(REDEEM_NONCE_TABLE)
+    .from(REDEEM_NONCE_TABLE)
     .upsert(
       {
         mint,
@@ -251,7 +254,7 @@ export const fetchRedeemNonce = async ({
 }) => {
   const supabase = getServiceSupabase();
   const { data, error } = await supabase
-    .from<RedeemNonceRow>(REDEEM_NONCE_TABLE)
+    .from(REDEEM_NONCE_TABLE)
     .select('*')
     .eq('mint', mint)
     .eq('nonce', nonce)
@@ -261,13 +264,13 @@ export const fetchRedeemNonce = async ({
     throw error;
   }
 
-  return data;
+  return (data ?? null) as RedeemNonceRow | null;
 };
 
 export const markNonceUsed = async ({ mint, nonce }: { mint: string; nonce: string }) => {
   const supabase = getServiceSupabase();
   const { error } = await supabase
-    .from<RedeemNonceRow>(REDEEM_NONCE_TABLE)
+    .from(REDEEM_NONCE_TABLE)
     .update({ used: true, used_at: new Date().toISOString() })
     .eq('mint', mint)
     .eq('nonce', nonce);
@@ -280,7 +283,7 @@ export const markNonceUsed = async ({ mint, nonce }: { mint: string; nonce: stri
 export const markMintUsed = async (mint: string) => {
   const supabase = getServiceSupabase();
   const { error } = await supabase
-    .from<MintRow>(MINTS_TABLE)
+    .from(MINTS_TABLE)
     .update({ used: true, used_at: new Date().toISOString() })
     .eq('mint', mint);
 
