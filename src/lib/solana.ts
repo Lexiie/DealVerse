@@ -1,7 +1,7 @@
 import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
 import { SOLANA_CLUSTER, SOLANA_RPC } from '@/utils/constants';
 
-const resolveEndpoint = () => {
+export const resolveEndpoint = () => {
   if (SOLANA_RPC) {
     return SOLANA_RPC;
   }

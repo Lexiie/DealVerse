@@ -7,11 +7,11 @@ import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { AppLayout } from '@/components/Layout';
 import { getWalletAdapters } from '@/lib/wallets';
-import { SOLANA_CLUSTER } from '@/utils/constants';
+import { resolveEndpoint } from '@/lib/solana';
 import { Toaster } from 'sonner';
 
 const MyApp = ({ Component, pageProps }: AppProps) => {
-  const endpoint = SOLANA_CLUSTER;
+  const endpoint = resolveEndpoint();
   const wallets = useMemo(() => getWalletAdapters(), []);
   const [queryClient] = useState(() => new QueryClient());
 
