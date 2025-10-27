@@ -17,7 +17,7 @@ export const DealCard = ({ deal, onClaim, isClaiming }: DealCardProps) => {
   const statusLabel = deal.status.replace('_', ' ');
 
   return (
-    <article className="flex flex-col gap-4 rounded-2xl border border-slate-800 bg-slate-900/60 p-5 shadow-lg backdrop-blur">
+    <article className="flex flex-col gap-4 rounded-2xl border border-slate-800/70 bg-slate-900/75 p-5 shadow-lg backdrop-blur-lg">
       <div className="relative h-40 w-full overflow-hidden rounded-xl bg-slate-800">
         {deal.imageUrl ? (
           <Image
@@ -51,7 +51,7 @@ export const DealCard = ({ deal, onClaim, isClaiming }: DealCardProps) => {
         onClick={() => (onClaim ? onClaim(deal) : undefined)}
         disabled={!canClaim}
         isLoading={isClaiming}
-        className="mt-auto"
+        className="mt-auto h-12 w-full rounded-2xl"
       >
         {canClaim ? 'Claim NFT Coupon' : 'Not Available'}
       </Button>

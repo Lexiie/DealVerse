@@ -45,16 +45,30 @@ export const QRScanner = ({ onResult, onError }: QRScannerProps) => {
   );
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/60 p-4 shadow-lg">
-      <DynamicQrScanner
-        onScan={(results: ScannerResult) => {
-          const value = results[0]?.rawValue ?? null;
-          handleScan(value);
-        }}
-        onError={handleError}
-        constraints={{ facingMode: 'environment' }}
-        styles={{ container: { width: '100%' }, video: { width: '100%' } }}
-      />
+    <div className="relative mx-auto w-full max-w-xl">
+      <div className="relative aspect-square overflow-hidden rounded-[32px] border-2 border-primary/70 bg-slate-900/80 shadow-2xl">
+        <DynamicQrScanner
+          onScan={(results: ScannerResult) => {
+            const value = results[0]?.rawValue ?? null;
+            handleScan(value);
+          }}
+          onError={handleError}
+          constraints={{ facingMode: 'environment' }}
+          styles={{
+            container: { width: '100%', height: '100%' },
+            video: { width: '100%', height: '100%', objectFit: 'cover' }
+          }}
+        />
+        <div className="pointer-events-none absolute inset-0 rounded-[32px] border border-primary/20 ring-1 ring-primary/20" />
+        <div
+          className="pointer-events-none absolute inset-0 bg-slate-950/70"
+          style={{ WebkitMaskImage: 'radial-gradient(circle at center, transparent 55%, black 78%)', maskImage: 'radial-gradient(circle at center, transparent 55%, black 78%)' }}
+        />
+        <div className="pointer-events-none absolute inset-4 rounded-3xl border-2 border-primary/50" />
+        <div className="pointer-events-none absolute bottom-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-primary/90 text-lg shadow-lg">
+          ⚡
+        </div>
+      </div>
     </div>
   );
 };

@@ -55,24 +55,25 @@ const MerchantPage = () => {
       </Head>
       <div className="grid gap-8 lg:grid-cols-[2fr,1fr]">
         <MerchantForm onSubmit={handleSubmit} isSubmitting={mintMutation.isPending} />
-        <aside className="space-y-4">
-          <Card>
-            <CardHeader title="Minting Checklist" subtitle="Ensure your deal is ready for the chain" />
-            <CardContent className="space-y-3 text-sm text-slate-300">
-              <p>1. Connect Phantom or Solflare wallet.</p>
-              <p>2. Upload artwork to Arweave/Pinata and paste the URL.</p>
-              <p>3. Set an expiry time that matches in-store availability.</p>
-              <p>4. Mint — metadata and Supabase records update automatically.</p>
+        <aside className="space-y-5">
+          <Card className="bg-slate-900/75">
+            <CardHeader title="Minting Checklist" subtitle="Quick reminder before you go live" />
+            <CardContent className="space-y-2.5 text-[13px] leading-relaxed text-slate-300">
+              <p>✅ Connect Phantom or Solflare merchant wallet.</p>
+              <p>🖼️ Host artwork on Pinata/Irys and paste the link above.</p>
+              <p>⏰ Align the expiry window with your in-store availability.</p>
+              <p>📦 Mint to push metadata on-chain & sync Supabase instantly.</p>
             </CardContent>
           </Card>
           {mintAddress ? (
-            <Card>
+            <Card className="bg-slate-900/75">
               <CardHeader title="Mint Details" />
               <CardContent className="space-y-3 text-sm text-slate-200">
-                <p className="break-all text-xs text-slate-400">{mintAddress}</p>
+                <p className="break-all rounded-xl bg-slate-900/60 px-3 py-2 text-xs text-slate-300">{mintAddress}</p>
                 <Button
                   variant="secondary"
                   onClick={handleCopyMint}
+                  className="h-11 w-full rounded-xl"
                 >
                   Copy Mint Address
                 </Button>

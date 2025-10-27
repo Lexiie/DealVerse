@@ -10,12 +10,13 @@ const WalletMultiButton = dynamic(
 export const WalletConnect = () => {
   const wallet = useWallet();
 
+  const label = wallet.address ? `${truncateAddress(wallet.address)} ▾` : 'Connect Wallet';
+
   return (
-    <div className="flex items-center gap-3">
-      <WalletMultiButton className="rounded-lg bg-primary/90 px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary" />
-      {wallet.address ? (
-        <span className="text-xs text-slate-400">{truncateAddress(wallet.address)}</span>
-      ) : null}
-    </div>
+    <WalletMultiButton
+      className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
+    >
+      <span className="truncate">{label}</span>
+    </WalletMultiButton>
   );
 };

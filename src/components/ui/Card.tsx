@@ -19,7 +19,7 @@ type CardContentProps = {
 };
 
 export const Card = ({ className, children }: CardProps) => (
-  <div className={cn('rounded-xl border border-slate-800 bg-slate-900/60 p-6 shadow-lg backdrop-blur', className)}>
+  <div className={cn('rounded-2xl border border-slate-800/70 bg-slate-900/75 p-6 shadow-lg backdrop-blur-lg', className)}>
     {children}
   </div>
 );
