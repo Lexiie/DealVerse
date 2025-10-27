@@ -38,7 +38,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     return res.status(200).json(deals);
   } catch (error) {
     console.error('Failed to fetch deals', error);
-    return res.status(500).json({ error: 'Failed to fetch deals' });
+    return res.status(200).json(fallbackDeals);
   }
 };
 
