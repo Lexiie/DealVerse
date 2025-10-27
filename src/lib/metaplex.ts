@@ -1,4 +1,4 @@
-import { Metaplex, keypairIdentity, bundlrStorage } from '@metaplex-foundation/js';
+import { Metaplex, keypairIdentity, irysStorage } from '@metaplex-foundation/js';
 import { Keypair, PublicKey } from '@solana/web3.js';
 import { randomUUID } from 'crypto';
 import { getSolanaConnection } from './solana';
@@ -76,7 +76,7 @@ export const getMetaplex = () => {
   metaplex = Metaplex.make(connection)
     .use(keypairIdentity(identity))
     .use(
-      bundlrStorage({
+      irysStorage({
         address: 'https://node1.bundlr.network',
         providerUrl: connection.rpcEndpoint,
         timeout: 60000
