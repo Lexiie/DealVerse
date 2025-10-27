@@ -56,6 +56,22 @@ export const parseSecretKey = (raw: string): Uint8Array => {
     }
   }
 
+  const hexLike = /^0x?[0-9A-Fa-f]+$/.test(compact);
+  if (hexLike) {
+    try {
+      let normalized = compact.startsWith('0x') || compact.startsWith('0X') ? compact.slice(2) : compact;
+      if (normalized.length % 2 !== 0) {
+        normalized = `0${normalized}`;
+      }
+      const decodedHex = Uint8Array.from(Buffer.from(normalized, 'hex'));
+      if (decodedHex.length > 0) {
+        return decodedHex;
+      }
+    } catch (error) {
+      // ignore and try base58 fallback
+    }
+  }
+
   const decoded = decodeBase58(compact);
   if (!decoded.length) {
     throw new Error('Unable to decode secret key');
