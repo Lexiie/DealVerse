@@ -23,8 +23,8 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "*",
-    "react-qr-reader": "*",
-    "sonner": "*"
+    "sonner": "*",
+    "@yudiel/react-qr-scanner": "*"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "*",
