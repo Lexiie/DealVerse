@@ -13,7 +13,7 @@ const BottomNavigation = ({ hidden }: { hidden: boolean }) => {
   const router = useRouter();
   return (
     <nav
-      className={`fixed bottom-[max(16px,env(safe-area-inset-bottom))] left-1/2 z-40 w-[clamp(260px,92vw,420px)] -translate-x-1/2 rounded-2xl border border-slate-800/70 bg-slate-900/90 px-3 py-2 shadow-sm backdrop-blur transition-transform duration-150 ${
+      className={`fixed bottom-0 left-1/2 z-40 w-[clamp(260px,92vw,420px)] -translate-x-1/2 rounded-t-2xl border border-slate-800/70 bg-slate-900/95 px-3 pb-[calc(8px+env(safe-area-inset-bottom))] pt-2 shadow-md backdrop-blur-sm transition-transform duration-150 ${
         hidden ? 'translate-y-24 opacity-0' : 'opacity-100'
       }`}
     >
@@ -26,7 +26,7 @@ const BottomNavigation = ({ hidden }: { hidden: boolean }) => {
               href={href}
               className={`flex h-12 items-center justify-center rounded-xl text-center transition ${
                 isActive
-                  ? 'bg-primary text-primary-foreground shadow-inner'
+                  ? 'bg-primary/90 text-primary-foreground shadow-inner'
                   : 'text-slate-300 hover:bg-slate-800/60 hover:text-foreground'
               }`}
             >
@@ -66,7 +66,7 @@ export const AppLayout = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-950 pb-[calc(72px+env(safe-area-inset-bottom))] pt-14 text-foreground">
+    <div className="min-h-screen bg-slate-950 pb-[calc(96px+env(safe-area-inset-bottom))] pt-14 text-foreground">
       <header className="fixed top-0 left-0 right-0 z-40 border-b border-slate-800/70 bg-slate-950/95 backdrop-blur">
         <div className="mx-auto flex h-11 w-full max-w-[640px] items-center justify-between px-4">
           <Link href="/" className="text-[21px] font-semibold tracking-tight text-primary">
