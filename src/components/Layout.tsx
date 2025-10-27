@@ -66,9 +66,9 @@ export const AppLayout = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-950 pb-[calc(96px+env(safe-area-inset-bottom))] pt-14 text-foreground">
+    <div className="min-h-screen overflow-x-hidden bg-slate-950 pb-[calc(96px+env(safe-area-inset-bottom))] pt-14 text-foreground">
       <header className="fixed top-0 left-0 right-0 z-40 border-b border-slate-800/70 bg-slate-950/95 backdrop-blur">
-        <div className="mx-auto flex h-11 w-full max-w-[640px] items-center justify-between px-4">
+        <div className="mx-auto flex h-14 w-full max-w-[640px] items-center justify-between px-4">
           <Link href="/" className="text-[21px] font-semibold tracking-tight text-primary">
             DealVerse
           </Link>

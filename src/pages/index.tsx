@@ -42,8 +42,8 @@ const MarketplacePage = () => {
       <Head>
         <title>DealVerse Marketplace</title>
       </Head>
-      <section className="mt-4 mb-8 space-y-4 rounded-2xl border border-slate-800/70 bg-slate-900/70 p-5 shadow-lg">
-        <div className="space-y-3 px-1">
+      <section className="mt-4 mb-8 space-y-4 rounded-2xl border border-slate-800/70 bg-slate-900/70 px-4 py-5 shadow-lg">
+        <div className="space-y-3">
           <p className="text-xs uppercase tracking-[0.3em] text-primary">Web3 Coupons</p>
           <h1
             className="max-w-prose text-[22px] font-semibold leading-tight text-foreground sm:text-[26px]"
@@ -55,7 +55,7 @@ const MarketplacePage = () => {
             DealVerse transforms traditional promotions into dynamic, tradable assets. Own your rewards, share them with friends, or redeem in-store with on-chain verification.
           </p>
         </div>
-        <div className="space-y-3 rounded-2xl bg-slate-900/80 p-4">
+        <div className="space-y-3 rounded-2xl bg-slate-900/80 px-4 py-4">
           {[
             'Minted directly on Solana Devnet',
             'QR redemption with nonce protection',
