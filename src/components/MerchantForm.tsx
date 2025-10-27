@@ -23,11 +23,11 @@ export const MerchantForm = ({ defaultValues, onSubmit, isSubmitting }: Merchant
     formState: { errors }
   } = useForm<FormValues>({
     defaultValues: {
-      title: '',
-      description: '',
-      discount: '',
-      supply: 100,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
+      title: defaultValues?.title ?? '',
+      description: defaultValues?.description ?? '',
+      discount: defaultValues?.discount ?? 25,
+      supply: defaultValues?.supply ?? 100,
+      expiresAt: (defaultValues?.expiresAt ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()).slice(0, 16),
       imageUrl: defaultValues?.imageUrl ?? '',
       tagsText: defaultValues?.tags?.join(', ') ?? ''
     }
@@ -41,7 +41,7 @@ export const MerchantForm = ({ defaultValues, onSubmit, isSubmitting }: Merchant
     await onSubmit({
       title: values.title,
       description: values.description,
-      discount: values.discount,
+      discount: Number(values.discount),
       supply: Number(values.supply),
       expiresAt: values.expiresAt,
       imageUrl: values.imageUrl,
@@ -61,12 +61,12 @@ export const MerchantForm = ({ defaultValues, onSubmit, isSubmitting }: Merchant
           </div>
 
           <div className="space-y-1">
-            <Label htmlFor="description" required>Description</Label>
+            <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
               placeholder="Describe the benefit and redemption instructions"
               rows={4}
-              {...register('description', { required: 'Description is required' })}
+              {...register('description')}
             />
             {errors.description ? <p className="text-xs text-red-400">{errors.description.message}</p> : null}
           </div>
@@ -74,7 +74,19 @@ export const MerchantForm = ({ defaultValues, onSubmit, isSubmitting }: Merchant
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-1">
               <Label htmlFor="discount" required>Discount</Label>
-              <Input id="discount" placeholder="25%" {...register('discount', { required: 'Discount is required' })} />
+              <Input
+                id="discount"
+                type="number"
+                min={1}
+                max={100}
+                placeholder="25"
+                {...register('discount', {
+                  required: 'Discount is required',
+                  valueAsNumber: true,
+                  min: { value: 1, message: 'Discount must be between 1 and 100' },
+                  max: { value: 100, message: 'Discount must be between 1 and 100' }
+                })}
+              />
               {errors.discount ? <p className="text-xs text-red-400">{errors.discount.message}</p> : null}
             </div>
             <div className="space-y-1">

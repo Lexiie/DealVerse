@@ -12,7 +12,9 @@ export type DealCardProps = {
 
 export const DealCard = ({ deal, onClaim, isClaiming }: DealCardProps) => {
   const expiresLabel = `Expires ${formatDate(deal.expiresAt)}`;
+  const discountLabel = `${deal.discount}% OFF`;
   const canClaim = deal.status === 'active' && deal.remaining > 0;
+  const statusLabel = deal.status.replace('_', ' ');
 
   return (
     <article className="flex flex-col gap-4 rounded-2xl border border-slate-800 bg-slate-900/60 p-5 shadow-lg backdrop-blur">
@@ -32,14 +34,17 @@ export const DealCard = ({ deal, onClaim, isClaiming }: DealCardProps) => {
       </div>
       <div className="flex flex-col gap-2">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="text-xl font-semibold text-foreground">{deal.title}</h3>
-          <Badge>{deal.discount}</Badge>
+          <div>
+            <p className="text-[11px] uppercase tracking-widest text-slate-400">{deal.merchant}</p>
+            <h3 className="text-xl font-semibold text-foreground">{deal.title}</h3>
+          </div>
+          <Badge>{discountLabel}</Badge>
         </div>
-        <p className="text-sm text-slate-300">{deal.description}</p>
+        {deal.description ? <p className="text-sm text-slate-300">{deal.description}</p> : null}
         <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
           <span>{expiresLabel}</span>
-          <span>Remaining: {deal.remaining}/{deal.supply}</span>
-          <span>Status: {deal.status}</span>
+          <span>Remaining: {deal.remaining}/{deal.totalSupply}</span>
+          <span>Status: {statusLabel}</span>
         </div>
       </div>
       <Button

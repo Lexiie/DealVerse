@@ -1,10 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { decodeQrPayload, isQrPayloadValid } from '@/lib/qr';
 import { verifyCouponOwnership } from '@/lib/solana';
-import { recordRedemption } from '@/lib/deals';
 import { RedeemResponse } from '@/types';
-import { requireSupabase } from '@/lib/supabase';
-import { REDEMPTIONS_TABLE } from '@/utils/constants';
+import { fetchRedeemNonce, findClaimByWallet, markMintUsed, markNonceUsed } from '@/lib/deals';
+
+export const config = { runtime: 'nodejs' };
 
 const handler = async (req: NextApiRequest, res: NextApiResponse<RedeemResponse>) => {
   if (req.method !== 'POST') {
@@ -24,16 +24,24 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<RedeemResponse>
       return res.status(400).json({ success: false, error: 'QR payload is invalid or expired' });
     }
 
-    const supabase = requireSupabase();
+    const nonceRecord = await fetchRedeemNonce({ mint: payload.couponMint, nonce: payload.nonce });
 
-    const { data: existingRedemption } = await supabase
-      .from(REDEMPTIONS_TABLE)
-      .select('id')
-      .eq('nonce', payload.nonce)
-      .maybeSingle();
+    if (!nonceRecord) {
+      return res.status(404).json({ success: false, error: 'Nonce not registered or already cleared' });
+    }
 
-    if (existingRedemption) {
+    if (nonceRecord.used) {
       return res.status(409).json({ success: false, error: 'Coupon already redeemed' });
+    }
+
+    if (new Date(nonceRecord.expires_at).getTime() < Date.now()) {
+      return res.status(400).json({ success: false, error: 'QR code has expired' });
+    }
+
+    const claimRecord = await findClaimByWallet(payload.dealId, payload.owner);
+
+    if (!claimRecord || claimRecord.mint !== payload.couponMint) {
+      return res.status(403).json({ success: false, error: 'Wallet claim record mismatch' });
     }
 
     const ownsCoupon = await verifyCouponOwnership({ owner: payload.owner, mint: payload.couponMint });
@@ -42,12 +50,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<RedeemResponse>
       return res.status(403).json({ success: false, error: 'Wallet does not own coupon NFT' });
     }
 
-    await recordRedemption({
-      dealId: payload.dealId,
-      walletAddress: payload.owner,
-      mintAddress: payload.couponMint,
-      nonce: payload.nonce
-    });
+    await markNonceUsed({ mint: payload.couponMint, nonce: payload.nonce });
+    await markMintUsed(payload.couponMint);
 
     // TODO: Optionally invoke on-chain redeem program for immutable logging.
 

@@ -1,30 +1,31 @@
-export type DealStatus = 'active' | 'expired' | 'draft';
+export type DealStatus = 'active' | 'expired' | 'sold_out';
 
 export type Deal = {
   id: string;
   title: string;
-  description: string;
-  discount: string;
-  merchantAddress: string;
+  merchant: string;
+  description?: string;
+  discount: number;
   imageUrl?: string;
   nftMint?: string;
-  supply: number;
+  tags?: string[];
+  totalSupply: number;
+  claimed: number;
   remaining: number;
   expiresAt: string;
   status: DealStatus;
-  tags?: string[];
 };
 
 export type ClaimResponse = {
   success: boolean;
   message: string;
-  claimId?: string;
   encodedPayload?: string;
 };
 
 export type MintResponse = {
   success: boolean;
   mintAddress?: string;
+  dealId?: string;
   error?: string;
 };
 
@@ -35,8 +36,8 @@ export type RedeemResponse = {
 
 export type CreateDealPayload = {
   title: string;
-  description: string;
-  discount: string;
+  description?: string;
+  discount: number;
   supply: number;
   expiresAt: string;
   imageUrl?: string;

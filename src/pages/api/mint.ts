@@ -2,7 +2,8 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { mintCouponNft } from '@/lib/metaplex';
 import { recordDeal } from '@/lib/deals';
 import { MintDealRequestPayload, MintResponse } from '@/types';
-import { createNonce } from '@/lib/qr';
+
+export const config = { runtime: 'nodejs' };
 
 const handler = async (req: NextApiRequest, res: NextApiResponse<MintResponse>) => {
   if (req.method !== 'POST') {
@@ -12,40 +13,50 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<MintResponse>) 
 
   const { title, description, discount, supply, expiresAt, imageUrl, tags, merchantAddress } = req.body as MintDealRequestPayload;
 
-  if (!title || !description || !discount || !supply || !expiresAt || !merchantAddress) {
+  if (!title || !discount || !supply || !expiresAt || !merchantAddress) {
     return res.status(400).json({ success: false, error: 'Missing required fields' });
+  }
+
+  const numericDiscount = Number(discount);
+  if (!Number.isFinite(numericDiscount) || numericDiscount < 1 || numericDiscount > 100) {
+    return res.status(400).json({ success: false, error: 'Discount must be between 1 and 100' });
+  }
+
+  const numericSupply = Number(supply);
+  if (!Number.isFinite(numericSupply) || numericSupply < 1) {
+    return res.status(400).json({ success: false, error: 'Supply must be at least 1' });
+  }
+
+  const expiryIso = new Date(expiresAt).toISOString();
+  if (Number.isNaN(Date.parse(expiryIso))) {
+    return res.status(400).json({ success: false, error: 'Invalid expiry date' });
   }
 
   try {
     const nft = await mintCouponNft({
       name: title,
       description,
-      discount,
-      supply,
-      expiresAt,
-      imageUrl: imageUrl ?? '',
+      discount: numericDiscount,
+      supply: numericSupply,
+      expiresAt: expiryIso,
+      imageUrl,
       tags
     });
 
     const mintAddress = nft.mint.address.toBase58();
-    const dealId = `deal-${createNonce(6)}`;
-
-    await recordDeal({
-      id: dealId,
+    const deal = await recordDeal({
       title,
       description,
-      discount,
-      merchantAddress,
+      discount: numericDiscount,
       imageUrl,
+      tags,
+      merchantAddress,
       nftMint: mintAddress,
-      supply,
-      remaining: supply,
-      expiresAt,
-      status: 'active',
-      tags
+      supply: numericSupply,
+      expiresAt: expiryIso
     });
 
-    return res.status(200).json({ success: true, mintAddress });
+    return res.status(200).json({ success: true, mintAddress, dealId: deal.id });
   } catch (error) {
     console.error('Mint API failed', error);
     return res.status(500).json({ success: false, error: 'Failed to mint NFT coupon' });

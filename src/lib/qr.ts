@@ -1,3 +1,5 @@
+import { QR_NONCE_LENGTH, QR_TTL_MS } from '@/utils/constants';
+
 const getRandomBytes = (length: number) => {
   if (typeof window !== 'undefined' && window.crypto?.getRandomValues) {
     const array = new Uint8Array(length);
@@ -42,13 +44,13 @@ export type QrPayload = {
   expiresAt: number;
 };
 
-export const createNonce = (length = 16) => bytesToHex(getRandomBytes(length));
+export const createNonce = (length = QR_NONCE_LENGTH) => bytesToHex(getRandomBytes(length));
 
 export const createQrPayload = ({
   dealId,
   couponMint,
   owner,
-  ttlMs = 5 * 60 * 1000
+  ttlMs = QR_TTL_MS
 }: {
   dealId: string;
   couponMint: string;

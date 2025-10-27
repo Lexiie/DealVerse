@@ -1,9 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { encodeQrPayload, createQrPayload } from '@/lib/qr';
-import { getDealById, recordClaim, updateDealSupply } from '@/lib/deals';
 import { ClaimRequestPayload, ClaimResponse } from '@/types';
-import { requireSupabase } from '@/lib/supabase';
-import { CLAIMS_TABLE } from '@/utils/constants';
+import { findClaimByWallet, getDealById, recordClaim, registerRedeemNonce } from '@/lib/deals';
+
+export const config = { runtime: 'nodejs' };
 
 const handler = async (req: NextApiRequest, res: NextApiResponse<ClaimResponse>) => {
   if (req.method !== 'POST') {
@@ -24,25 +24,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<ClaimResponse>)
       return res.status(404).json({ success: false, message: 'Deal not found' });
     }
 
-    if (deal.status !== 'active') {
-      return res.status(400).json({ success: false, message: 'Deal is not active' });
+    if (new Date(deal.expiresAt).getTime() < Date.now()) {
+      return res.status(400).json({ success: false, message: 'Deal has expired' });
     }
 
     if (deal.remaining <= 0) {
       return res.status(400).json({ success: false, message: 'Deal is sold out' });
     }
 
-    if (new Date(deal.expiresAt).getTime() < Date.now()) {
-      return res.status(400).json({ success: false, message: 'Deal has expired' });
-    }
-
-    const supabase = requireSupabase();
-    const { data: existingClaim } = await supabase
-      .from(CLAIMS_TABLE)
-      .select('id')
-      .eq('deal_id', dealId)
-      .eq('wallet_address', walletAddress)
-      .maybeSingle();
+    const existingClaim = await findClaimByWallet(dealId, walletAddress);
 
     if (existingClaim) {
       return res.status(409).json({ success: false, message: 'Wallet already claimed this deal' });
@@ -58,20 +48,22 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<ClaimResponse>)
       mintAddress: deal.nftMint
     });
 
-    await updateDealSupply(dealId, deal.remaining - 1);
+    const qrPayload = createQrPayload({
+      dealId,
+      couponMint: deal.nftMint,
+      owner: walletAddress
+    });
 
-    const encodedPayload = encodeQrPayload(
-      createQrPayload({
-        dealId,
-        couponMint: deal.nftMint,
-        owner: walletAddress
-      })
-    );
+    await registerRedeemNonce({
+      mint: qrPayload.couponMint,
+      nonce: qrPayload.nonce,
+      expiresAt: qrPayload.expiresAt
+    });
 
     return res.status(200).json({
       success: true,
       message: 'Coupon claimed',
-      encodedPayload
+      encodedPayload: encodeQrPayload(qrPayload)
     });
   } catch (error) {
     console.error('Claim API failed', error);

@@ -1,51 +1,40 @@
 # DealVerse
 
-DealVerse is a Web3-native deal discovery and loyalty platform where promotions are minted as NFT coupons on Solana. The project follows the [prd.md](./prd.md) specification and ships a Next.js (TypeScript) MVP with merchant minting, user discovery, and QR-based redemption flows.
+DealVerse is a Web3-native deal discovery and loyalty platform where Solana NFT coupons unlock IRL promotions. It follows the [prd.md](./prd.md) specification and ships a Next.js (TypeScript) MVP featuring merchant minting, user discovery, and QR-based redemption with Supabase-backed auditability.
 
 ## Tech Stack
 
 - Next.js 14, React 18, TypeScript
-- TailwindCSS + custom shadcn-inspired UI components
-- Solana wallet adapter (`@solana/wallet-adapter-*`)
-- Metaplex JS SDK for NFT minting
-- Supabase (Postgres) for deal, claim, and redemption records
-- Sonner (toasts), react-hook-form, react-query
+- TailwindCSS + lightweight shadcn-inspired UI primitives
+- Solana wallet adapter suite (`@solana/wallet-adapter-*`) and Metaplex JS SDK
+- Supabase Postgres (deals, mints, redeem_nonce) with service-role API access
+- qrcode.react + react-qr-reader for claim/redeem flows
 
-## Getting Started
+## Deployment Flow
 
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
-2. Copy `.env.local.example` to `.env.local` and fill in the values:
-   - `NEXT_PUBLIC_SOLANA_CLUSTER` (Devnet RPC)
-   - `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `SOLANA_SIGNER_SECRET_KEY` (JSON array for the merchant signer)
-   - Optional: `NEXT_PUBLIC_METAPLEX_COLLECTION_ADDRESS`, `NEXT_PUBLIC_REDEEM_PROGRAM_ID`
-3. Run the development server:
-   ```bash
-   npm run dev
-   ```
-4. Visit `http://localhost:3000` for the marketplace, `/merchant` for minting, and `/redeem` for QR verification.
+- Connect the repository to Vercel and rely on the managed CI/CD pipeline (`git push → Vercel build`).
+- Set the project runtime to Node.js 20 and enable the default Next.js build (`next build`).
+- Provision environment variables on Vercel (Production & Preview):
+  - `NEXT_PUBLIC_SOLANA_CLUSTER`
+  - `NEXT_PUBLIC_SOLANA_RPC`
+  - `NEXT_PUBLIC_SUPABASE_URL`
+  - `NEXT_PUBLIC_SUPABASE_KEY`
+  - `NEXT_PUBLIC_METAPLEX_COLLECTION_ADDRESS`
+  - `SOLANA_SIGNER_SECRET_KEY` (base58 or JSON array)
+  - `SUPABASE_SERVICE_ROLE`
+  - `ARWEAVE_KEY` (optional storage signer)
+- Ensure Supabase hosts the schema defined in `prd.md` (tables: `deals`, `mints`, `redeem_nonce`, with RLS enabled and service-role writes).
 
-## Testing
+## Architecture Notes
 
-```bash
-npm test
-```
+- `src/lib/solana.ts` centralises RPC configuration and token ownership verification.
+- `src/lib/metaplex.ts` mints NFTs through Metaplex with Bundlr storage helpers.
+- `src/lib/deals.ts` encapsulates Supabase reads/writes for deals, claims, and nonce lifecycle.
+- API routes (`src/pages/api/*`) are pinned to the Node runtime and use service-role Supabase interactions exclusively server-side.
+- QR payload helpers (`src/lib/qr.ts`) enforce per-claim nonces with a 2 minute TTL to satisfy replay guardrails.
 
-Tests currently cover QR helper utilities; extend with more unit and integration coverage as the API solidifies.
+## Operational Checklist
 
-## Key Architecture Notes
-
-- All blockchain access is centralized in `src/lib/solana.ts` and `src/lib/metaplex.ts` per guardrails.
-- Supabase is the single off-chain source of truth via helpers in `src/lib/deals.ts`.
-- Nonce-based QR payloads prevent replay and are validated in both UI and API layers.
-- API routes live under `src/pages/api` and orchestrate minting, claiming, and redeeming flows.
-
-## Roadmap
-
-- Integrate on-chain redemption logging via the optional redeem program.
-- Add social discovery (ratings/comments) layer backed by Supabase.
-- Harden NFT distribution by delivering transactions directly from merchant to user wallets.
-
+- Merchants mint via `/merchant`; users browse and claim on `/`; redemption happens on `/redeem` with on-chain ownership checks.
+- Supabase tracks supply and redemptions (mints + nonce usage) so Vercel functions act as the trusted server component.
+- Future enhancements can plug in on-chain redemption programs or richer analytics without changing the deployment flow.

@@ -1,16 +1,24 @@
-import { Connection, PublicKey } from '@solana/web3.js';
-import { SOLANA_CLUSTER } from '@/utils/constants';
+import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
+import { SOLANA_CLUSTER, SOLANA_RPC } from '@/utils/constants';
 
-let connection: Connection | null = null;
-
-export const getSolanaConnection = () => {
-  if (!connection) {
-    connection = new Connection(SOLANA_CLUSTER, {
-      commitment: 'confirmed'
-    });
+const resolveEndpoint = () => {
+  if (SOLANA_RPC) {
+    return SOLANA_RPC;
   }
-  return connection;
+
+  const supportedClusters = ['devnet', 'testnet', 'mainnet-beta'] as const;
+  const cluster = supportedClusters.includes(SOLANA_CLUSTER as (typeof supportedClusters)[number])
+    ? (SOLANA_CLUSTER as (typeof supportedClusters)[number])
+    : 'devnet';
+
+  return clusterApiUrl(cluster);
 };
+
+export const connection = new Connection(resolveEndpoint(), {
+  commitment: 'confirmed'
+});
+
+export const getSolanaConnection = () => connection;
 
 export const getPublicKey = (value: string | PublicKey | null | undefined): PublicKey | null => {
   if (!value) {

@@ -1,9 +1,54 @@
 import { Metaplex, keypairIdentity, bundlrStorage } from '@metaplex-foundation/js';
 import { Keypair, PublicKey } from '@solana/web3.js';
+import { randomUUID } from 'crypto';
 import { getSolanaConnection } from './solana';
 import { METAPLEX_COLLECTION_ADDRESS } from '@/utils/constants';
 
 let metaplex: Metaplex | null = null;
+
+const BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+
+const decodeBase58 = (value: string) => {
+  let result = 0n;
+  for (const char of value) {
+    const index = BASE58_ALPHABET.indexOf(char);
+    if (index === -1) {
+      throw new Error('Invalid base58 character encountered');
+    }
+    result = result * 58n + BigInt(index);
+  }
+
+  const leadingZeros = value.match(/^1+/)?.[0].length ?? 0;
+  const bytes: number[] = [];
+
+  while (result > 0n) {
+    bytes.push(Number(result & 0xffn));
+    result >>= 8n;
+  }
+
+  for (let i = 0; i < leadingZeros; i += 1) {
+    bytes.push(0);
+  }
+
+  return Uint8Array.from(bytes.reverse());
+};
+
+const parseSecretKey = (raw: string) => {
+  try {
+    const asArray = JSON.parse(raw);
+    if (Array.isArray(asArray)) {
+      return Uint8Array.from(asArray);
+    }
+  } catch (error) {
+    // fall through to base58
+  }
+
+  const decoded = decodeBase58(raw.trim());
+  if (!decoded.length) {
+    throw new Error('Unable to decode signer secret key');
+  }
+  return decoded;
+};
 
 const getIdentityKeypair = () => {
   const secret = process.env.SOLANA_SIGNER_SECRET_KEY;
@@ -12,10 +57,9 @@ const getIdentityKeypair = () => {
   }
 
   try {
-    const secretKey = Uint8Array.from(JSON.parse(secret));
-    return Keypair.fromSecretKey(secretKey);
+    return Keypair.fromSecretKey(parseSecretKey(secret));
   } catch (error) {
-    console.error('Failed to parse signer key', error);
+    console.error('Failed to load signer key', error);
     throw error;
   }
 };
@@ -43,9 +87,9 @@ export const getMetaplex = () => {
 
 export type MintCouponPayload = {
   name: string;
-  description: string;
-  imageUrl: string;
-  discount: string;
+  description?: string;
+  imageUrl?: string;
+  discount: number;
   supply: number;
   expiresAt: string;
   tags?: string[];
@@ -65,12 +109,13 @@ export const mintCouponNft = async (payload: MintCouponPayload) => {
         : undefined,
       json: {
         name: payload.name,
-        description: payload.description,
+        description: payload.description ?? '',
         image: payload.imageUrl,
         attributes: [
-          { trait_type: 'discount', value: payload.discount },
+          { trait_type: 'discount', value: `${payload.discount}%` },
           { trait_type: 'expires_at', value: payload.expiresAt },
-          ...(payload.tags ?? []).map((tag) => ({ trait_type: 'tag', value: tag }))
+          ...(payload.tags ?? []).map((tag) => ({ trait_type: 'tag', value: tag })),
+          { trait_type: 'uuid', value: randomUUID() }
         ]
       }
     });
