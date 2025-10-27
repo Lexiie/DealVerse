@@ -1,8 +1,10 @@
 import dynamic from 'next/dynamic';
 import { useCallback } from 'react';
+import type { IDetectedBarcode } from '@yudiel/react-qr-scanner';
 import { isQrPayloadValid, decodeQrPayload } from '@/lib/qr';
 
 type QRData = string | null;
+type ScannerResult = IDetectedBarcode[];
 
 export type QRScannerProps = {
   onResult: (encodedPayload: string) => void;
@@ -45,11 +47,13 @@ export const QRScanner = ({ onResult, onError }: QRScannerProps) => {
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/60 p-4 shadow-lg">
       <DynamicQrScanner
-        onDecode={(result) => handleScan(result ?? null)}
+        onScan={(results: ScannerResult) => {
+          const value = results[0]?.rawValue ?? null;
+          handleScan(value);
+        }}
         onError={handleError}
         constraints={{ facingMode: 'environment' }}
-        containerStyle={{ width: '100%' }}
-        videoStyle={{ width: '100%' }}
+        styles={{ container: { width: '100%' }, video: { width: '100%' } }}
       />
     </div>
   );
