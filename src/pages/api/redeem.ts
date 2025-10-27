@@ -24,6 +24,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<RedeemResponse>
       return res.status(400).json({ success: false, error: 'QR payload is invalid or expired' });
     }
 
+    if (!payload) {
+      return res.status(400).json({ success: false, error: 'QR payload could not be decoded' });
+    }
+
     const nonceRecord = await fetchRedeemNonce({ mint: payload.couponMint, nonce: payload.nonce });
 
     if (!nonceRecord) {
