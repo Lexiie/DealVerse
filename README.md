@@ -1,6 +1,6 @@
 # DealVerse
 
-DealVerse is a Web3-native deal discovery and loyalty platform where Solana NFT coupons unlock IRL promotions. It follows the [prd.md](./prd.md) specification and ships a Next.js (TypeScript) MVP featuring merchant minting, user discovery, and QR-based redemption with Supabase-backed auditability.
+DealVerse is a Web3-native deal discovery and loyalty platform where Solana NFT coupons unlock IRL promotions. Specification and ships a Next.js (TypeScript) MVP featuring merchant minting, user discovery, and QR-based redemption with Supabase-backed auditability.
 
 ## Tech Stack
 
