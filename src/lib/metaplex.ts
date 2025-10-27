@@ -3,6 +3,7 @@ import { Keypair, PublicKey } from '@solana/web3.js';
 import { randomUUID } from 'crypto';
 import { getSolanaConnection } from './solana';
 import { METAPLEX_COLLECTION_ADDRESS } from '@/utils/constants';
+import { uploadMetadataAuto } from './storage';
 
 let metaplex: Metaplex | null = null;
 
@@ -93,12 +94,35 @@ export type MintCouponPayload = {
   supply: number;
   expiresAt: string;
   tags?: string[];
+  preprovidedUri?: string;
 };
 
 export const mintCouponNft = async (payload: MintCouponPayload) => {
   const client = getMetaplex();
 
   try {
+    const metadata = {
+      name: payload.name,
+      symbol: 'DEAL',
+      description: payload.description ?? '',
+      image: payload.imageUrl ?? '',
+      attributes: [
+        { trait_type: 'discount', value: `${payload.discount}%` },
+        { trait_type: 'expires_at', value: payload.expiresAt },
+        ...(payload.tags ?? []).map((tag) => ({ trait_type: 'tag', value: tag })),
+        { trait_type: 'uuid', value: randomUUID() }
+      ],
+      properties: {
+        category: 'deal',
+        redemption: 'qr+nonce'
+      }
+    };
+
+    const metadataUri = await uploadMetadataAuto({
+      metadata,
+      preprovidedUri: payload.preprovidedUri
+    });
+
     const { nft } = await client.nfts().create({
       name: payload.name,
       symbol: 'DEAL',
@@ -107,20 +131,11 @@ export const mintCouponNft = async (payload: MintCouponPayload) => {
       collection: METAPLEX_COLLECTION_ADDRESS
         ? new PublicKey(METAPLEX_COLLECTION_ADDRESS)
         : undefined,
-      json: {
-        name: payload.name,
-        description: payload.description ?? '',
-        image: payload.imageUrl,
-        attributes: [
-          { trait_type: 'discount', value: `${payload.discount}%` },
-          { trait_type: 'expires_at', value: payload.expiresAt },
-          ...(payload.tags ?? []).map((tag) => ({ trait_type: 'tag', value: tag })),
-          { trait_type: 'uuid', value: randomUUID() }
-        ]
-      }
+      uri: metadataUri,
+      isMutable: true
     });
 
-    return nft;
+    return { nft, uri: metadataUri };
   } catch (error) {
     console.error('Minting failed', error);
     throw error;

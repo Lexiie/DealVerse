@@ -11,7 +11,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<MintResponse>) 
     return res.status(405).json({ success: false, error: 'Method Not Allowed' });
   }
 
-  const { title, description, discount, supply, expiresAt, imageUrl, tags, merchantAddress } = req.body as MintDealRequestPayload;
+  const {
+    title,
+    description,
+    discount,
+    supply,
+    expiresAt,
+    imageUrl,
+    tags,
+    merchantAddress,
+    preprovidedUri
+  } = req.body as MintDealRequestPayload;
 
   if (!title || !discount || !supply || !expiresAt || !merchantAddress) {
     return res.status(400).json({ success: false, error: 'Missing required fields' });
@@ -33,14 +43,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<MintResponse>) 
   }
 
   try {
-    const nft = await mintCouponNft({
+    const { nft, uri } = await mintCouponNft({
       name: title,
       description,
       discount: numericDiscount,
       supply: numericSupply,
       expiresAt: expiryIso,
       imageUrl,
-      tags
+      tags,
+      preprovidedUri
     });
 
     const mintAddress = nft.mint.address.toBase58();
@@ -56,10 +67,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<MintResponse>) 
       expiresAt: expiryIso
     });
 
-    return res.status(200).json({ success: true, mintAddress, dealId: deal.id });
+    return res.status(200).json({ success: true, mintAddress, dealId: deal.id, uri });
   } catch (error) {
     console.error('Mint API failed', error);
-    return res.status(500).json({ success: false, error: 'Failed to mint NFT coupon' });
+    const message = error instanceof Error ? error.message : 'Failed to mint NFT coupon';
+    return res.status(500).json({ success: false, error: message });
   }
 };
 

@@ -23,7 +23,6 @@ DealVerse is a Web3-native deal discovery and loyalty platform where Solana NFT 
   - `SOLANA_SIGNER_SECRET_KEY` (base58 or JSON array)
   - `SUPABASE_SERVICE_ROLE`
   - `ARWEAVE_KEY` (optional storage signer)
-- Ensure Supabase hosts the schema defined in `prd.md` (tables: `deals`, `mints`, `redeem_nonce`, with RLS enabled and service-role writes).
 
 ## Architecture Notes
 

@@ -26,6 +26,7 @@ export type MintResponse = {
   success: boolean;
   mintAddress?: string;
   dealId?: string;
+  uri?: string;
   error?: string;
 };
 
@@ -46,6 +47,7 @@ export type CreateDealPayload = {
 
 export type MintDealRequestPayload = CreateDealPayload & {
   merchantAddress: string;
+  preprovidedUri?: string;
 };
 
 export type ClaimRequestPayload = {
